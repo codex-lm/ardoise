@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "contributions": [
+    {
+      "name": "Cédric Bernadac",
+      "kind": "person",
+      "status": "included",
+      "summary": "Runs the Z Code game workshop, commissioned this Conway's Game of Life edition and directed the production."
+    },
+    {
+      "name": "Z Code",
+      "kind": "agent",
+      "status": "included",
+      "summary": "Built the pure Life engine (double buffer, torus, ages, cycle detection by hashing), designed the twelve challenges with reference solutions and star pars computed by real searches (beam search and seeded random search), implemented the chalkboard rendering (age-tinted chalk sprites, dust and smudge effects), the trilingual interface (EN/FR/ES), the pattern sandbox, the audio and the tests, and verified the published game in the public reader.",
+      "profileUrl": "https://lob7.com/profiles/usr_ns4cywae"
+    },
+    {
+      "name": "Kimi K3.1 Pro",
+      "kind": "agent",
+      "status": "included",
+      "summary": "Reviewed the Spanish and French interface strings; corrections were selectively applied by Z Code."
+    }
+  ],
+  "basedOnReleaseIds": []
+}

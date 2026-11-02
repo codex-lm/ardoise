@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ardoise</title>
+  <meta name="description" content="Ardoise — Conway's Game of Life on a school blackboard: twelve chalk challenges and a free pattern sandbox, in English, French and Spanish.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="top">
+      <div class="brand">
+        <h1 id="title">ARDOISE</h1>
+        <p id="tagline"></p>
+      </div>
+      <div class="topctl">
+        <div id="langs" class="langs" role="group" aria-label="Language"></div>
+        <button id="btn-sound" class="ghost" aria-label="Sound"></button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Accueil -->
+      <section id="home" class="screen">
+        <p class="subtitle" data-i18n="subtitle"></p>
+        <div class="homebtns">
+          <button id="btn-play" class="primary big"></button>
+          <button id="btn-sandbox" class="big"></button>
+          <button id="btn-howto" class="big"></button>
+        </div>
+        <div id="levelgrid" class="levelgrid"></div>
+        <p class="keys" data-i18n="touchHint"></p>
+      </section>
+
+      <!-- Jeu (défi ou atelier) -->
+      <section id="game" class="screen hidden">
+        <div class="hud">
+          <button id="btn-menu" class="small"></button>
+          <div class="hud-mid">
+            <span id="chip-level" class="chip"></span>
+            <span id="chip-type" class="chip"></span>
+            <span id="chip-gen" class="chip"></span>
+            <span id="chip-bell" class="chip bell"></span>
+            <span id="chip-pop" class="chip"></span>
+            <span id="chip-budget" class="chip"></span>
+            <span id="chip-status" class="chip"></span>
+          </div>
+          <span style="flex:1"></span>
+          <canvas id="spark" class="sparkline" width="140" height="34" aria-hidden="true"></canvas>
+        </div>
+
+        <div id="board-frame">
+          <div id="board-wrap">
+            <canvas id="board" aria-label="Ardoise"></canvas>
+          </div>
+        </div>
+
+        <div class="goalbar">
+          <span class="chip tp" id="goal-label"></span>
+          <span id="goal-text"></span>
+        </div>
+        <div class="goalbar" id="goal-stars" style="font-size:13px"></div>
+
+        <div id="tray-challenge" class="tray">
+          <button id="btn-draw" class="btn-chalk small"></button>
+          <button id="btn-erase" class="btn-sponge small"></button>
+          <span class="sep"></span>
+          <button id="btn-run" class="small"></button>
+          <button id="btn-step" class="small"></button>
+          <button id="btn-restart" class="small"></button>
+          <span class="spacer"></span>
+          <button id="btn-hint" class="small"></button>
+        </div>
+
+        <div id="tray-sandbox" class="tray hidden">
+          <button id="sb-draw" class="btn-chalk small"></button>
+          <button id="sb-erase" class="btn-sponge small"></button>
+          <span class="sep"></span>
+          <button id="sb-run" class="small"></button>
+          <button id="sb-step" class="small"></button>
+          <span class="sep"></span>
+          <label for="sb-speed"></label>
+          <input id="sb-speed" type="range" min="1" max="60" value="12" step="1" style="width:110px">
+          <span id="sb-speed-val" class="chip" style="font-size:12px"></span>
+          <button id="sb-wrap" class="small"></button>
+          <button id="sb-random" class="small"></button>
+          <button id="sb-clear" class="small"></button>
+        </div>
+        <div id="patternbar" class="patterns hidden"></div>
+        <p class="keys" id="sb-hint" style="display:none"></p>
+      </section>
+    </main>
+
+    <footer>
+      <span data-i18n="credit"></span><br>
+      <span data-i18n="homage"></span>
+    </footer>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <div id="overlay" class="hidden" role="dialog" aria-modal="true">
+    <div id="overlay-card"></div>
+  </div>
+
+  <script src="assets/engine.js"></script>
+  <script src="assets/levels.js"></script>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/audio.js"></script>
+  <script src="assets/ui.js"></script>
+</body>
+</html>

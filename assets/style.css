@@ -1,0 +1,214 @@
+/* ARDOISE — tableau d'école : ardoise verte, craie blanche/jaune, bois.
+   Palette centralisée (audit artDirection). */
+:root {
+  --ardoise: #2f4a3f;        /* fond tableau */
+  --ardoise-clair: #3a5a4c;  /* reliefs */
+  --ardoise-fonce: #24382f;  /* creux */
+  --craie: #f2f0e4;          /* craie blanche */
+  --craie-jaune: #e8d44d;    /* craie jaune (accent unique) */
+  --craie-doux: rgba(242, 240, 228, 0.72);
+  --traie: rgba(242, 240, 228, 0.16);
+  --mur: #d9d0ba;            /* mur de classe */
+  --mur-fonce: #c9bfa6;
+  --bois: #8a6b4a;           /* cadre + bac à craie */
+  --bois-fonce: #6d5338;
+  --ombre: rgba(30, 40, 34, 0.35);
+  --main: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--main);
+  color: var(--craie);
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 252, 240, 0.5), rgba(255, 252, 240, 0) 60%),
+    linear-gradient(160deg, var(--mur) 0%, var(--mur-fonce) 100%);
+  min-height: 100vh;
+  -webkit-user-select: none; user-select: none;
+  touch-action: manipulation;
+}
+
+#app { max-width: 1080px; margin: 0 auto; padding: 10px 12px 18px; }
+
+/* ---------- entête ---------- */
+header#top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; padding: 6px 2px 10px;
+}
+.brand h1 {
+  margin: 0; font-size: clamp(30px, 6vw, 46px); letter-spacing: 4px;
+  color: var(--craie);
+  text-shadow: 0 2px 0 var(--ardoise-fonce), 0 0 14px rgba(242, 240, 228, 0.25);
+}
+.brand h1 .lt { display: inline-block; }
+.brand p { margin: 2px 0 0; color: var(--ardoise-fonce); font-size: 14px; }
+.topctl { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- boutons craie ---------- */
+button {
+  font-family: var(--main); font-size: 16px; color: var(--craie);
+  background: rgba(47, 74, 63, 0.25);
+  border: 2.5px solid var(--ardoise);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  padding: 8px 16px; cursor: pointer; min-height: 44px;
+  transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease;
+}
+button:hover { background: rgba(47, 74, 63, 0.45); }
+button:active { transform: translateY(2px) scale(0.98); }
+button.primary {
+  background: var(--ardoise); color: var(--craie);
+  box-shadow: 3px 4px 0 var(--ombre);
+  font-size: 19px; padding: 12px 26px;
+}
+button.big { font-size: 19px; padding: 12px 24px; }
+button.ghost { border-color: var(--ardoise); background: transparent; min-height: 40px; padding: 6px 12px; }
+button.small { font-size: 14px; min-height: 38px; padding: 6px 12px; }
+button:disabled { opacity: 0.4; cursor: default; }
+button.on { background: var(--ardoise); color: var(--craie-jaune); }
+button:focus-visible { outline: 3px dashed var(--ardoise); outline-offset: 2px; }
+
+/* langues */
+.langs { display: flex; gap: 6px; }
+
+/* ---------- écrans ---------- */
+.screen.hidden, .hidden { display: none !important; }
+.subtitle { color: var(--ardoise-fonce); font-size: clamp(15px, 2.6vw, 19px); max-width: 640px; }
+#home .homebtns { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0 8px; }
+#home .homebtns button { color: var(--ardoise-fonce); border-color: var(--ardoise-fonce); }
+#home .homebtns button.primary { color: var(--craie); }
+.keys { color: var(--ardoise-fonce); font-size: 13px; margin: 10px 0 0; }
+
+/* grille de niveaux */
+.levelgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+.lvl {
+  border: 2.5px solid var(--ardoise); border-radius: 18px 6px 16px 8px / 8px 16px 6px 18px;
+  background: rgba(47, 74, 63, 0.92); color: var(--craie);
+  padding: 10px 12px; cursor: pointer; text-align: left; min-height: 86px;
+  display: flex; flex-direction: column; gap: 4px; justify-content: space-between;
+  font-size: 15px;
+}
+.lvl:hover { background: var(--ardoise); }
+.lvl .nm { font-size: 16px; }
+.lvl .tp { color: var(--craie-doux); font-size: 12.5px; font-family: var(--mono); }
+.lvl .st { color: var(--craie-jaune); letter-spacing: 2px; font-size: 15px; }
+.lvl.locked { opacity: 0.45; cursor: default; }
+.lvl.locked:hover { background: rgba(47, 74, 63, 0.92); }
+.lvl .lk { font-size: 12.5px; color: var(--craie-doux); }
+
+/* ---------- plateau ---------- */
+#board-frame {
+  background: linear-gradient(180deg, var(--bois) 0%, var(--bois-fonce) 100%);
+  border-radius: 14px; padding: 12px;
+  box-shadow: 0 14px 34px var(--ombre), inset 0 2px 3px rgba(255, 255, 255, 0.25);
+  margin: 8px 0 4px;
+}
+#board-wrap { position: relative; border-radius: 6px; overflow: hidden; }
+#board { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+#zone-flash { position: absolute; inset: 0; pointer-events: none; }
+
+/* HUD */
+.hud { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 10px; }
+.hud-mid { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.chip {
+  font-family: var(--mono); font-size: 13.5px; color: var(--ardoise-fonce);
+  border: 2px solid var(--ardoise-fonce); border-radius: 12px 4px 10px 5px / 5px 10px 4px 12px;
+  padding: 4px 10px; background: rgba(255, 252, 240, 0.35);
+}
+.chip b { color: var(--ardoise-fonce); }
+.chip.bell { color: #7a5a10; border-color: #a8871e; background: rgba(232, 212, 77, 0.35); }
+.goalbar { margin: 8px 0 0; font-size: 15.5px; color: var(--ardoise-fonce); display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.goalbar .tp { font-size: 13px; padding: 3px 10px; }
+.sparkline { image-rendering: pixelated; vertical-align: middle; }
+
+/* bac à craie (contrôles) */
+.tray {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  background: linear-gradient(180deg, #9a7a55 0%, var(--bois) 100%);
+  border-radius: 10px; padding: 9px 12px; margin-top: 10px;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.28), 0 4px 10px var(--ombre);
+}
+.tray button { border-color: var(--bois-fonce); color: #2e2318; background: rgba(242, 240, 228, 0.85); }
+.tray button:hover { background: var(--craie); }
+.tray button.on { background: #2e2318; color: var(--craie); }
+.tray .sep { width: 2px; align-self: stretch; background: rgba(46, 35, 24, 0.35); border-radius: 2px; }
+.tray .spacer { flex: 1; }
+.tray label { font-family: var(--mono); font-size: 12.5px; color: #efe9d8; }
+
+/* boutons Craie / Éponge en forme */
+.btn-chalk { position: relative; padding-left: 40px !important; }
+.btn-chalk::before {
+  content: ""; position: absolute; left: 10px; top: 50%; transform: translateY(-50%) rotate(-4deg);
+  width: 20px; height: 9px; border-radius: 3px; background: linear-gradient(180deg, #fdfcf6, #d8d4c4);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+.btn-sponge { position: relative; padding-left: 40px !important; }
+.btn-sponge::before {
+  content: ""; position: absolute; left: 10px; top: 50%; transform: translateY(-50%) rotate(3deg);
+  width: 20px; height: 12px; border-radius: 4px;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(120, 90, 30, 0.5) 1px, transparent 2px),
+    radial-gradient(circle at 65% 60%, rgba(120, 90, 30, 0.5) 1px, transparent 2px),
+    linear-gradient(180deg, #e9d27a, #c9a83f);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* motifs (atelier) */
+.patterns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.pat {
+  font-family: var(--mono); font-size: 12.5px; min-height: 36px; padding: 4px 10px;
+  border-width: 2px;
+}
+.pat.on { background: #2e2318; color: var(--craie-jaune); }
+
+/* ---------- superpositions ---------- */
+#toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+  background: var(--ardoise); color: var(--craie); font-size: 15.5px;
+  border: 2px solid var(--craie-doux); border-radius: 14px 6px 12px 7px / 7px 12px 6px 14px;
+  padding: 10px 18px; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
+  z-index: 50; max-width: min(90vw, 480px); text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#overlay {
+  position: fixed; inset: 0; background: rgba(24, 36, 30, 0.72);
+  display: flex; align-items: center; justify-content: center; z-index: 40; padding: 16px;
+}
+#overlay-card {
+  background: linear-gradient(170deg, var(--ardoise-clair) 0%, var(--ardoise) 55%, var(--ardoise-fonce) 100%);
+  border: 3px solid var(--craie-doux); border-radius: 22px 8px 18px 10px / 10px 18px 8px 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  color: var(--craie); padding: 22px 26px; max-width: 560px; width: 100%;
+  max-height: 88vh; overflow: auto;
+}
+#overlay-card h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: 1px; }
+#overlay-card h2.chalk { color: var(--craie); }
+#overlay-card p { line-height: 1.45; font-size: 15.5px; }
+#overlay-card .stars { font-size: 42px; letter-spacing: 8px; color: var(--craie-jaune); margin: 8px 0; text-shadow: 0 0 18px rgba(232, 212, 77, 0.45); }
+#overlay-card .stars .off { color: rgba(242, 240, 228, 0.22); text-shadow: none; }
+#overlay-card .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+#overlay-card .row button { border-color: var(--craie-doux); background: transparent; color: var(--craie); }
+#overlay-card .row button.primary { background: var(--craie); color: var(--ardoise-fonce); box-shadow: none; }
+#overlay-card ul { padding-left: 20px; line-height: 1.5; font-size: 15px; }
+#overlay-card .mono { font-family: var(--mono); font-size: 13px; color: var(--craie-doux); }
+#overlay-card .demo { display: block; margin: 10px auto; border: 2px solid var(--traie); border-radius: 8px; background: var(--ardoise-fonce); }
+
+/* victoire : étoiles animées */
+@keyframes popstar { 0% { transform: scale(0.2) rotate(-25deg); opacity: 0; } 70% { transform: scale(1.25) rotate(6deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+#overlay-card .stars span { display: inline-block; animation: popstar 0.5s ease both; }
+#overlay-card .stars span:nth-child(2) { animation-delay: 0.16s; }
+#overlay-card .stars span:nth-child(3) { animation-delay: 0.32s; }
+
+footer { margin-top: 14px; color: var(--ardoise-fonce); font-size: 12.5px; text-align: center; }
+
+/* petits écrans */
+@media (max-width: 640px) {
+  #app { padding: 8px 8px 14px; }
+  .brand h1 { letter-spacing: 2px; }
+  .tray { padding: 7px 8px; gap: 6px; }
+  .tray button { font-size: 14px; padding: 6px 10px; }
+  #overlay-card { padding: 16px; }
+  .levelgrid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+}
