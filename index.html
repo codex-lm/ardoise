@@ -2037,8 +2037,9 @@ footer { margin-top: 14px; color: var(--ardoise-fonce); font-size: 12.5px; text-
       canvas.height = Math.round(cssH * dpr);
       canvas.style.width = cssW + 'px';
       canvas.style.height = cssH + 'px';
-      makeSprites();
-      paintBackground();
+      bg = null; // l'atelier dessine sa base en vecteur, pas de fond pré-rendu
+      ensureSprites(VIEW.zoom, performance.now(), true);
+      buildSandboxLayers();
       clampView();
     } else {
       cellPx = clamp(Math.floor(Math.min(a.w / S.grid.w, a.h / S.grid.h)), 4, 34);
@@ -2049,9 +2050,52 @@ footer { margin-top: 14px; color: var(--ardoise-fonce); font-size: 12.5px; text-
       canvas.style.width = cssW + 'px';
       canvas.style.height = cssH + 'px';
       offX = 0; offY = 0;
-      makeSprites();
+      ensureSprites(1, performance.now(), true);
       paintBackground();
     }
+  }
+
+  // Reconstruit les sprites si la taille ÉCRAN d'une cellule a changé
+  // (palier ≥ 15 %, au plus toutes les 90 ms) : netteté constante au zoom.
+  function ensureSprites(z, now, force) {
+    const want = Math.max(3, Math.round(cellPx * z * dpr));
+    const drift = Math.abs(want - spriteDevPx) > Math.max(1, spriteDevPx * 0.15);
+    if (force || (drift && now - lastSpriteBuild > 90)) {
+      makeSprites(want);
+      spriteDevPx = want;
+      lastSpriteBuild = now;
+      if (viewActive()) buildSandboxLayers();
+    }
+  }
+
+  // Couches d'atelier re-échantillonnées au zoom : grain d'ardoise en motif
+  // + traces d'éponge déterministes (la grille et le cadre, eux, sont
+  // redessinés en vecteur à chaque image — voir drawSandboxBase).
+  function buildSandboxLayers() {
+    const scale = clamp(VIEW.zoom * dpr, 0.3, 10);
+    const tileW = 256;
+    const c = document.createElement('canvas');
+    c.width = c.height = Math.max(64, Math.min(1024, Math.round(tileW * scale)));
+    const x = c.getContext('2d');
+    const rnd = mulberry(20261102);
+    const n = Math.round(c.width * c.height / 26 / (scale * scale));
+    for (let i = 0; i < n; i++) {
+      const px = rnd() * c.width, py = rnd() * c.height;
+      x.fillStyle = rnd() > 0.5 ? 'rgba(255,255,255,0.024)' : 'rgba(0,0,0,0.05)';
+      const s = (1 + rnd() * 1.6) / scale * (c.width / tileW);
+      x.fillRect(px, py, s, s * 0.8);
+    }
+    slatePat = ctx.createPattern(c, 'repeat');
+    // traces d'éponge : positions monde fixes, dessin vectoriel à chaque image
+    const sm = [];
+    const r2 = mulberry(S.grid.w * 131 + S.grid.h * 17 + 5);
+    for (let i = 0; i < 9; i++) {
+      sm.push({
+        x: r2() * worldW(), y: r2() * worldH(),
+        w: 40 + r2() * 90, h: 14 + r2() * 26
+      });
+    }
+    smudges = sm;
   }
 
   // ---------------------------------------------------------------- sprites craie
@@ -2071,18 +2115,23 @@ footer { margin-top: 14px; color: var(--ardoise-fonce); font-size: 12.5px; text-
     return 4;
   }
 
-  function makeSprites() {
+  // Les sprites craie sont construits à la résolution ÉCRAN effective
+  // (cellule monde × zoom × dpr) : dessinés en repère monde sous la
+  // transformation de vue, ils tombent 1:1 dans les pixels du canvas —
+  // nets à tous les zooms. La densité du grain suit la résolution.
+  let spriteDevPx = 0, lastSpriteBuild = 0, slatePat = null, smudges = [];
+
+  function makeSprites(devPx) {
     sprites = [];
-    const px = Math.max(4, Math.round(cellPx) - (cellPx > 7 ? 1 : 0));
+    const scale = devPx / cellPx; // pixels device par pixel monde
     for (let b = 0; b < BUCKETS.length; b++) {
       const row = [];
       for (let v = 0; v < 4; v++) {
         const c = document.createElement('canvas');
-        c.width = Math.max(4, Math.round(cellPx * dpr));
+        c.width = Math.max(4, Math.round(devPx));
         c.height = c.width;
         const x = c.getContext('2d');
-        const s = c.width / cellPx;
-        x.scale(s, s);
+        x.scale(scale, scale);
         const inset = cellPx > 7 ? 1 : 0.5;
         const w = cellPx - inset * 2;
         const r = Math.min(3, w / 4);
@@ -2097,13 +2146,13 @@ footer { margin-top: 14px; color: var(--ardoise-fonce); font-size: 12.5px; text-
         x.arcTo(inset, inset, inset + w, inset, r);
         x.closePath();
         x.fill();
-        // aspérités : petits trous soustraits
+        // aspérités : trous soustraits, taille ~constante À L'ÉCRAN
         x.globalCompositeOperation = 'destination-out';
         const rnd = mulberry(b * 17 + v * 101 + 7);
-        const holes = Math.max(2, Math.round(cellPx / 2.2));
+        const holes = Math.max(2, Math.round(devPx / 2.2));
         for (let i = 0; i < holes; i++) {
           const hx = inset + rnd() * w, hy = inset + rnd() * w;
-          const hr = 0.35 + rnd() * 0.75;
+          const hr = (0.5 + rnd() * 0.8) / scale;
           x.globalAlpha = 0.28 + rnd() * 0.3;
           x.beginPath(); x.arc(hx, hy, hr, 0, Math.PI * 2); x.fill();
         }
@@ -2226,20 +2275,81 @@ footer { margin-top: 14px; color: var(--ardoise-fonce); font-size: 12.5px; text-
     draw(now, dt);
   }
 
+  // Base d'atelier dessinée en VECTEUR à chaque image : grille et cadre
+  // gardent une épaisseur constante à l'écran, quel que soit le zoom.
+  function drawSandboxBase(z) {
+    const w = S.grid.w, h = S.grid.h, wW = worldW(), wH = worldH();
+    // ardoise + grain
+    ctx.fillStyle = '#2f4a3f';
+    ctx.fillRect(0, 0, wW, wH);
+    if (slatePat) { ctx.fillStyle = slatePat; ctx.fillRect(0, 0, wW, wH); }
+    // traces d'éponge (dégradés doux, indépendants de la résolution)
+    for (const s of smudges) {
+      const gr = ctx.createRadialGradient(s.x, s.y, 2, s.x, s.y, Math.max(s.w, s.h) / 2);
+      gr.addColorStop(0, 'rgba(230,236,228,0.055)');
+      gr.addColorStop(1, 'rgba(230,236,228,0)');
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.scale(1, s.h / s.w);
+      ctx.translate(-s.x, -s.y);
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.w / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    // grille : seules les lignes visibles, épaisseur 1 px écran
+    const vx0 = VIEW.camX, vy0 = VIEW.camY;
+    const gx0 = Math.max(0, Math.floor(vx0 / cellPx) - 1);
+    const gx1 = Math.min(w, Math.ceil((vx0 + cssW / z) / cellPx) + 1);
+    const gy0 = Math.max(0, Math.floor(vy0 / cellPx) - 1);
+    const gy1 = Math.min(h, Math.ceil((vy0 + cssH / z) / cellPx) + 1);
+    ctx.strokeStyle = 'rgba(242,240,228,0.11)';
+    ctx.lineWidth = 1 / z;
+    const wob = cellPx > 8 ? 0.9 : 0.4;
+    for (let gx = gx0; gx <= gx1; gx++) {
+      const jx = mulberry(gx * 977 + 3);
+      ctx.beginPath();
+      ctx.moveTo(gx * cellPx + 0.5 + (jx() - 0.5) * wob, 0);
+      for (let seg = 1; seg <= 4; seg++) {
+        ctx.lineTo(gx * cellPx + 0.5 + (jx() - 0.5) * wob, wH * seg / 4);
+      }
+      ctx.stroke();
+    }
+    for (let gy = gy0; gy <= gy1; gy++) {
+      const jy = mulberry(gy * 613 + 9);
+      ctx.beginPath();
+      ctx.moveTo(0, gy * cellPx + 0.5 + (jy() - 0.5) * wob);
+      for (let seg = 1; seg <= 4; seg++) {
+        ctx.lineTo(wW * seg / 4, gy * cellPx + 0.5 + (jy() - 0.5) * wob);
+      }
+      ctx.stroke();
+    }
+    // cadre à la craie (double trait vectoriel)
+    ctx.strokeStyle = 'rgba(242,240,228,0.5)';
+    ctx.lineWidth = 2 / z;
+    handRect(ctx, 2, 2, wW - 4, wH - 4, 31);
+    ctx.strokeStyle = 'rgba(242,240,228,0.2)';
+    ctx.lineWidth = 1 / z;
+    handRect(ctx, 6, 6, wW - 12, wH - 12, 77);
+  }
+
   function draw(now, dt) {
     const g = S.grid;
     const va = viewActive();
     const z = va ? VIEW.zoom : 1;
     const wW = worldW(), wH = worldH();
+    if (va) ensureSprites(z, now, false);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = '#24382f';
     ctx.fillRect(0, 0, cssW, cssH);
     if (va) {
       ctx.setTransform(dpr * z, 0, 0, dpr * z, -VIEW.camX * z * dpr, -VIEW.camY * z * dpr);
+      drawSandboxBase(z);
     } else {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (bg) ctx.drawImage(bg, 0, 0, wW, wH);
     }
-    if (bg) ctx.drawImage(bg, 0, 0, wW, wH);
     // chemin rapide : cellules minuscules à l'écran → fillRect, pas de sprites
     const tiny = cellPx * z < 4.2;
     if (tiny) {
