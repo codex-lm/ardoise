@@ -27,11 +27,14 @@ on laisse la vie courir jusqu'à la cloche :
 référence trouvée par recherche réelle — beam search / recherche aléatoire)
 peut être montré, au prix d'une étoile.
 
-**Atelier.** Grande planche (bords rejoints au choix), vitesse 1–60 gén./s,
-pas-à-pas, saupoudrage, et une bibliothèque des motifs célèbres : bloc, ruche,
-clignotant, crapaud, balise, pulsar, pentadécathlon, planeur, vaisseau léger,
-R-pentomino, gland, « coriace » et canon à planeurs de Gosper. Détection de
-cycles : figures fixes et oscillateurs sont nommés, avec leur période.
+**Atelier exploratoire.** Un grand tableau de plus de 50 000 cellules
+(288×184 sur écran large) : zoom à la molette ou au pincement, déplacement
+avec l'outil Main ou à deux doigts, recentrage en un geste. Vitesse 1–60
+gén./s, pas-à-pas, saupoudrage, bords rejoints au choix, et une bibliothèque
+des motifs célèbres : bloc, ruche, miche, clignotant, crapaud, balise, pulsar,
+pentadécathlon, planeur, vaisseau léger, R-pentomino, gland, « coriace » et
+canon à planeurs de Gosper. Détection de cycles : figures fixes et
+oscillateurs sont nommés, avec leur période.
 
 **Détails.** Craie blanche à la naissance, jaune en vieillissant ; poussière à
 chaque naissance et traînée fantôme à chaque mort ; sons doux synthétisés

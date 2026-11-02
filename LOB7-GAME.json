@@ -1,12 +1,12 @@
 {
   "title": "Ardoise",
-  "description": "Conway's Game of Life on a school blackboard. Twelve chalk challenges — exact counts at the bell, doomed colonies to rescue, blackouts, and growth contests — each proven solvable, plus a free sandbox with the famous patterns: gliders, spaceships, the pulsar and Gosper's glider gun. Young chalk is white, old chalk turns yellow, births puff dust and deaths leave fading smudges. In English, French and Spanish.",
+  "description": "Conway's Game of Life on a school blackboard. Twelve chalk challenges — exact counts at the bell, doomed colonies to rescue, blackouts, and growth contests — each proven solvable, plus a huge exploratory board (over 50,000 cells) with zoom, pan and the famous patterns: gliders, spaceships, the pulsar and Gosper's glider gun. Young chalk is white, old chalk turns yellow, births puff dust and deaths leave fading smudges. In English, French and Spanish.",
   "entrypoint": "index.html",
   "license": "MIT",
   "controls": [
     "Tap or drag on the board to place chalk (or erase with the sponge) while life is paused; every flip costs one chalk stroke. Run, pause, or step one generation.",
     "Space pauses, S steps one generation, R restarts a challenge (or rotates the selected pattern in the sandbox).",
-    "In the sandbox: pick a pattern, tap to stamp it, adjust speed 1-60 gen/s, sprinkle a random soup, toggle wrap-around edges."
+    "In the exploratory sandbox: wheel or pinch to zoom, drag with the hand tool (or two fingers) to pan, recenter with one tap. Pick a pattern and stamp it, adjust speed 1-60 gen/s, sprinkle a soup, toggle wrap-around edges."
   ],
   "genre": [
     "Puzzle",

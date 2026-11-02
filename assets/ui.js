@@ -38,7 +38,8 @@
     cycleInfo: null,
     lastStepAt: 0,
     bellFlash: 0,
-    wipeArmed: 0
+    wipeArmed: 0,
+    pinch: null                  // état du pincement en cours (atelier)
   };
 
   const canvas = $('board');
@@ -53,6 +54,40 @@
   const GHOSTS = [];
   const DUST = [];
 
+  // Vue exploratoire (atelier) : zoom + caméra en pixels monde.
+  const SB_CELL = 6;         // taille logique d'une cellule sur le grand tableau
+  const VIEW = { zoom: 1, camX: 0, camY: 0, minZ: 0.35, maxZ: 8 };
+  function viewActive() { return S.mode === 'sandbox' && !!S.grid; }
+  function worldW() { return S.grid ? S.grid.w * cellPx : cssW; }
+  function worldH() { return S.grid ? S.grid.h * cellPx : cssH; }
+
+  function clampView() {
+    const z = VIEW.zoom, w = worldW(), h = worldH();
+    const visW = cssW / z, visH = cssH / z;
+    const mx = Math.max(60, w * 0.12), my = Math.max(60, h * 0.12);
+    VIEW.camX = clamp(VIEW.camX, -mx, Math.max(-mx, w - visW + mx));
+    VIEW.camY = clamp(VIEW.camY, -my, Math.max(-my, h - visH + my));
+  }
+
+  function zoomAt(sx, sy, factor) {
+    const z0 = VIEW.zoom;
+    const z1 = clamp(z0 * factor, VIEW.minZ, VIEW.maxZ);
+    if (z1 === z0) return;
+    const wx = VIEW.camX + sx / z0, wy = VIEW.camY + sy / z0;
+    VIEW.zoom = z1;
+    VIEW.camX = wx - sx / z1;
+    VIEW.camY = wy - sy / z1;
+    clampView();
+  }
+
+  function centerView() {
+    const w = worldW(), h = worldH();
+    VIEW.zoom = clamp(Math.min(cssW / w, cssH / h), VIEW.minZ, 1.4);
+    VIEW.camX = (w - cssW / VIEW.zoom) / 2;
+    VIEW.camY = (h - cssH / VIEW.zoom) / 2;
+    clampView();
+  }
+
   // ---------------------------------------------------------------- dimensions
   function boardArea() {
     const frame = $('board-frame');
@@ -64,17 +99,31 @@
   function layout() {
     if (!S.grid) return;
     const a = boardArea();
-    cellPx = clamp(Math.floor(Math.min(a.w / S.grid.w, a.h / S.grid.h)), 4, 34);
-    cssW = cellPx * S.grid.w;
-    cssH = cellPx * S.grid.h;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-    offX = 0; offY = 0;
-    makeSprites();
-    paintBackground();
+    if (S.mode === 'sandbox') {
+      // grand tableau exploratoire : cellule logique fixe, canvas = zone visible
+      cellPx = SB_CELL;
+      cssW = a.w;
+      cssH = a.h;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      canvas.style.width = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+      makeSprites();
+      paintBackground();
+      clampView();
+    } else {
+      cellPx = clamp(Math.floor(Math.min(a.w / S.grid.w, a.h / S.grid.h)), 4, 34);
+      cssW = cellPx * S.grid.w;
+      cssH = cellPx * S.grid.h;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      canvas.style.width = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+      offX = 0; offY = 0;
+      makeSprites();
+      paintBackground();
+    }
   }
 
   // ---------------------------------------------------------------- sprites craie
@@ -150,23 +199,25 @@
 
   // ---------------------------------------------------------------- fond statique
   function paintBackground() {
+    const wW = worldW(), wH = worldH();
     bg = document.createElement('canvas');
-    bg.width = canvas.width; bg.height = canvas.height;
+    bg.width = Math.round(wW * dpr);
+    bg.height = Math.round(wH * dpr);
     const x = bg.getContext('2d');
     x.scale(dpr, dpr);
     // ardoise
     x.fillStyle = '#2f4a3f';
-    x.fillRect(0, 0, cssW, cssH);
+    x.fillRect(0, 0, wW, wH);
     // granulation de l'ardoise
     const rnd = mulberry(S.grid.w * 131 + S.grid.h * 17 + (S.mode === 'sandbox' ? 5 : 11));
-    for (let i = 0; i < cssW * cssH / 26; i++) {
-      const px = rnd() * cssW, py = rnd() * cssH;
+    for (let i = 0; i < wW * wH / 26; i++) {
+      const px = rnd() * wW, py = rnd() * wH;
       x.fillStyle = rnd() > 0.5 ? 'rgba(255,255,255,0.024)' : 'rgba(0,0,0,0.05)';
       x.fillRect(px, py, 1 + rnd() * 1.6, 1 + rnd() * 1.2);
     }
     // traces d'éponge (ellipse pâle)
     for (let i = 0; i < 3; i++) {
-      const ex = rnd() * cssW, ey = rnd() * cssH;
+      const ex = rnd() * wW, ey = rnd() * wH;
       const ew = 40 + rnd() * 90, eh = 14 + rnd() * 26;
       const grd = x.createRadialGradient(ex, ey, 2, ex, ey, Math.max(ew, eh) / 2);
       grd.addColorStop(0, 'rgba(230,236,228,0.055)');
@@ -184,7 +235,7 @@
       x.beginPath();
       x.moveTo(gx * cellPx + 0.5 + (jx() - 0.5) * wob, 0);
       for (let seg = 1; seg <= 4; seg++) {
-        x.lineTo(gx * cellPx + 0.5 + (jx() - 0.5) * wob, cssH * seg / 4);
+        x.lineTo(gx * cellPx + 0.5 + (jx() - 0.5) * wob, wH * seg / 4);
       }
       x.stroke();
     }
@@ -194,17 +245,17 @@
       x.beginPath();
       x.moveTo(0, gy * cellPx + 0.5 + (jy() - 0.5) * wob);
       for (let seg = 1; seg <= 4; seg++) {
-        x.lineTo(cssW * seg / 4, gy * cellPx + 0.5 + (jy() - 0.5) * wob);
+        x.lineTo(wW * seg / 4, gy * cellPx + 0.5 + (jy() - 0.5) * wob);
       }
       x.stroke();
     }
     // cadre à la craie (double trait)
     x.strokeStyle = 'rgba(242,240,228,0.5)';
     x.lineWidth = 2;
-    handRect(x, 2, 2, cssW - 4, cssH - 4, 31);
+    handRect(x, 2, 2, wW - 4, wH - 4, 31);
     x.strokeStyle = 'rgba(242,240,228,0.2)';
     x.lineWidth = 1;
-    handRect(x, 6, 6, cssW - 12, cssH - 12, 77);
+    handRect(x, 6, 6, wW - 12, wH - 12, 77);
     // zone de croissance (défi growth)
     if (S.mode === 'challenge' && level() && level().type === 'growth') {
       const z = level().zone;
@@ -248,28 +299,51 @@
   }
 
   function draw(now, dt) {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (bg) ctx.drawImage(bg, 0, 0, cssW, cssH);
     const g = S.grid;
-    // cellules
-    for (let y = 0; y < g.h; y++) {
-      for (let x = 0; x < g.w; x++) {
-        const i = y * g.w + x;
-        if (!g.cells[i]) continue;
-        const b = bucketOf(g.age[i]);
-        const v = (x * 7 + y * 13 + ((x * y) | 0)) % 4;
-        ctx.drawImage(sprites[b][v], x * cellPx, y * cellPx, cellPx, cellPx);
+    const va = viewActive();
+    const z = va ? VIEW.zoom : 1;
+    const wW = worldW(), wH = worldH();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#24382f';
+    ctx.fillRect(0, 0, cssW, cssH);
+    if (va) {
+      ctx.setTransform(dpr * z, 0, 0, dpr * z, -VIEW.camX * z * dpr, -VIEW.camY * z * dpr);
+    } else {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    if (bg) ctx.drawImage(bg, 0, 0, wW, wH);
+    // chemin rapide : cellules minuscules à l'écran → fillRect, pas de sprites
+    const tiny = cellPx * z < 4.2;
+    if (tiny) {
+      ctx.fillStyle = '#f2f0e4';
+      for (let y = 0; y < g.h; y++) {
+        const row = y * g.w;
+        for (let x = 0; x < g.w; x++) {
+          if (g.cells[row + x]) ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
+        }
+      }
+    } else {
+      for (let y = 0; y < g.h; y++) {
+        const row = y * g.w;
+        for (let x = 0; x < g.w; x++) {
+          if (!g.cells[row + x]) continue;
+          const b = bucketOf(g.age[row + x]);
+          const v = (x * 7 + y * 13 + ((x * y) | 0)) % 4;
+          ctx.drawImage(sprites[b][v], x * cellPx, y * cellPx, cellPx, cellPx);
+        }
       }
     }
-    // fantômes de craie
-    const nowMs = now;
-    for (let i = GHOSTS.length - 1; i >= 0; i--) {
-      const gh = GHOSTS[i];
-      const age = (nowMs - gh.t0) / 900;
-      if (age >= 1) { GHOSTS.splice(i, 1); continue; }
-      ctx.strokeStyle = 'rgba(242,240,228,' + (0.3 * (1 - age)).toFixed(3) + ')';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(gh.x * cellPx + 1.5, gh.y * cellPx + 1.5, cellPx - 3, cellPx - 3);
+    // fantômes de craie (masqués en vue très éloignée)
+    if (!tiny) {
+      const nowMs = now;
+      for (let i = GHOSTS.length - 1; i >= 0; i--) {
+        const gh = GHOSTS[i];
+        const age = (nowMs - gh.t0) / 900;
+        if (age >= 1) { GHOSTS.splice(i, 1); continue; }
+        ctx.strokeStyle = 'rgba(242,240,228,' + (0.3 * (1 - age)).toFixed(3) + ')';
+        ctx.lineWidth = 1 / z;
+        ctx.strokeRect(gh.x * cellPx + 1.5, gh.y * cellPx + 1.5, cellPx - 3, cellPx - 3);
+      }
     }
     // poussière
     for (let i = DUST.length - 1; i >= 0; i--) {
@@ -284,8 +358,8 @@
     if (S.hintCells && now < S.hintUntil) {
       ctx.save();
       ctx.strokeStyle = 'rgba(232,212,77,0.95)';
-      ctx.setLineDash([4, 3]);
-      ctx.lineWidth = 2;
+      ctx.setLineDash([4 / z, 3 / z]);
+      ctx.lineWidth = 2 / z;
       for (const [hx, hy] of S.hintCells) {
         ctx.strokeRect(hx * cellPx + 1, hy * cellPx + 1, cellPx - 2, cellPx - 2);
       }
@@ -294,7 +368,7 @@
     // surbrillance du survol
     if (S.hover && S.mode !== 'home') {
       ctx.strokeStyle = 'rgba(242,240,228,0.55)';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.5 / z;
       if (S.stamp && S.mode === 'sandbox') {
         const pc = stampCells();
         ctx.fillStyle = 'rgba(242,240,228,0.35)';
@@ -307,8 +381,9 @@
         ctx.strokeRect(S.hover[0] * cellPx + 1, S.hover[1] * cellPx + 1, cellPx - 2, cellPx - 2);
       }
     }
-    // éclair de cloche
+    // éclair de cloche (repère écran)
     if (S.bellFlash > 0) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const a = S.bellFlash;
       ctx.fillStyle = 'rgba(242,240,228,' + (0.35 * a).toFixed(3) + ')';
       ctx.fillRect(0, 0, cssW, cssH);
@@ -481,7 +556,7 @@
       if (L.type === 'rescue') html += '<p>' + esc(t('winRescue', { n: pop })) + '</p>';
       if (L.type === 'extinct') html += '<p>' + esc(t('winExtinct', { g: S.grid.gen })) + '</p>';
       if (L.type === 'growth') html += '<p>' + esc(t('bestPop', { n: pop })) + '</p>';
-      if (L.type !== 'growth') html += '<p class="mono">' + esc(t('usedStrokes', { n: S.strokes })) + (S.hintUsed ? ' · ' + esc(t('hintUsed')) : '') + '</p>';
+      if (L.type !== 'growth') html += '<p class="mono">' + esc(t(S.strokes === 1 ? 'usedStroke' : 'usedStrokes', { n: S.strokes })) + (S.hintUsed ? ' · ' + esc(t('hintUsed')) : '') + '</p>';
       else if (S.hintUsed) html += '<p class="mono">' + esc(t('hintUsed')) + '</p>';
       if (isLast) html += '<p>' + esc(t('allDone')) + '</p>';
     } else {
@@ -551,7 +626,7 @@
   function startSandbox() {
     S.mode = 'sandbox';
     const mobile = Math.min(window.innerWidth, window.innerHeight) < 640;
-    const cols = mobile ? 72 : 100, rows = mobile ? 46 : 64;
+    const cols = mobile ? 208 : 288, rows = mobile ? 136 : 184; // grand tableau
     S.grid = Life.makeGrid(cols, rows, []);
     S.grid.wrap = true;
     S.phase = 'run';
@@ -561,6 +636,8 @@
     S.stampRot = 0;
     S.popHist = [0];
     S.cycleInfo = null;
+    S.hover = null;
+    POINTERS.clear();
     GHOSTS.length = 0; DUST.length = 0;
     showScreen('game');
     $('tray-challenge').classList.add('hidden');
@@ -568,6 +645,7 @@
     $('patternbar').classList.remove('hidden');
     $('sb-hint').style.display = '';
     layout();
+    centerView();
     buildPatternBar();
     refreshTexts();
     updateHud();
@@ -665,6 +743,7 @@
       $('sb-wrap').classList.toggle('on', S.grid.wrap);
       $('sb-draw').classList.toggle('on', S.tool === 'draw' && !S.stamp);
       $('sb-erase').classList.toggle('on', S.tool === 'erase');
+      $('sb-pan').classList.toggle('on', S.tool === 'pan');
     }
   }
 
@@ -682,6 +761,8 @@
     $('btn-erase').textContent = t('erase');
     $('sb-draw').textContent = t('draw');
     $('sb-erase').textContent = t('erase');
+    $('sb-pan').textContent = t('pan');
+    $('sb-center').textContent = t('recenter');
     $('sb-run').textContent = S.running ? t('pauseBtn') : t('playBtn');
     $('sb-step').textContent = t('stepBtn');
     $('sb-wrap').textContent = t('wrap');
@@ -808,29 +889,70 @@
   function stopDemo() { clearInterval(demoTimer); demoGrid = null; }
 
   // ---------------------------------------------------------------- pointeur
+  const POINTERS = new Map();  // pointerId → {x, y} (repère canvas)
+  let painting = false;
+
   function canvasPos(e) {
     const r = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - r.left) / cellPx);
-    const y = Math.floor((e.clientY - r.top) / cellPx);
-    return [x, y];
+    let sx = e.clientX - r.left, sy = e.clientY - r.top;
+    if (viewActive()) {
+      // écran → monde
+      sx = VIEW.camX + sx / VIEW.zoom;
+      sy = VIEW.camY + sy / VIEW.zoom;
+    }
+    return [Math.floor(sx / cellPx), Math.floor(sy / cellPx)];
   }
 
-  let painting = false;
   canvas.addEventListener('pointerdown', function (e) {
     e.preventDefault();
     Sfx.unlock();
     if (overlayOpen) return;
-    painting = true;
+    const r = canvas.getBoundingClientRect();
+    POINTERS.set(e.pointerId, { x: e.clientX - r.left, y: e.clientY - r.top });
     canvas.setPointerCapture(e.pointerId);
+    if (POINTERS.size >= 2) { painting = false; return; } // pincement à deux doigts
+    painting = true;
     const [x, y] = canvasPos(e);
     S.hover = [x, y];
     if (S.stamp && S.mode === 'sandbox') stampAt(x, y);
-    else tapCell(x, y);
+    else if (S.tool !== 'pan') tapCell(x, y);
   });
+
   canvas.addEventListener('pointermove', function (e) {
+    const r = canvas.getBoundingClientRect();
+    const cur = { x: e.clientX - r.left, y: e.clientY - r.top };
+    if (POINTERS.has(e.pointerId)) {
+      const prev = POINTERS.get(e.pointerId);
+      // pincement : zoom + déplacement simultanés
+      if (POINTERS.size === 2 && viewActive()) {
+        POINTERS.set(e.pointerId, cur);
+        const pts = [...POINTERS.values()];
+        const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+        if (S.pinch) {
+          const f = d / S.pinch.d;
+          zoomAt(S.pinch.mid.x, S.pinch.mid.y, f);
+          VIEW.camX -= (mid.x - S.pinch.mid.x) / VIEW.zoom;
+          VIEW.camY -= (mid.y - S.pinch.mid.y) / VIEW.zoom;
+          clampView();
+        }
+        S.pinch = { d: d, mid: mid };
+        return;
+      }
+      // pan à un doigt avec l'outil Main
+      if (S.tool === 'pan' && viewActive() && painting) {
+        VIEW.camX -= (cur.x - prev.x) / VIEW.zoom;
+        VIEW.camY -= (cur.y - prev.y) / VIEW.zoom;
+        clampView();
+        POINTERS.set(e.pointerId, cur);
+        return;
+      }
+      POINTERS.set(e.pointerId, cur);
+    }
     const [x, y] = canvasPos(e);
     S.hover = [x, y];
     if (!painting) return;
+    if (S.tool === 'pan') return;
     if (S.stamp && S.mode === 'sandbox') return; // tampon : un clic = une pose
     // peinture continue : n'agit que si la cellule cible change d'état
     const g = S.grid;
@@ -844,7 +966,6 @@
       }
     } else if (S.phase !== 'done') {
       // en défi : le glissement appose l'outil (chaque changement coûte)
-      const L = level();
       const alive = g.cells[y * g.w + x];
       const wantChalk = S.tool === 'draw';
       if (wantChalk && alive) return;
@@ -852,10 +973,23 @@
       tapCell(x, y);
     }
   });
-  function endPaint() { painting = false; }
+
+  function endPaint(e) {
+    POINTERS.delete(e.pointerId);
+    if (POINTERS.size < 2) S.pinch = null;
+    if (POINTERS.size === 0) painting = false;
+  }
   canvas.addEventListener('pointerup', endPaint);
   canvas.addEventListener('pointercancel', endPaint);
   canvas.addEventListener('pointerleave', function () { S.hover = null; });
+
+  // molette : zoom autour du curseur (atelier)
+  canvas.addEventListener('wheel', function (e) {
+    if (!viewActive()) return;
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0016));
+  }, { passive: false });
 
   // ---------------------------------------------------------------- clavier
   document.addEventListener('keydown', function (e) {
@@ -942,6 +1076,8 @@
   $('sb-step').onclick = doStep;
   $('sb-draw').onclick = function () { S.tool = 'draw'; S.stamp = null; buildPatternBar(); updateHud(); };
   $('sb-erase').onclick = function () { S.tool = 'erase'; updateHud(); };
+  $('sb-pan').onclick = function () { S.tool = S.tool === 'pan' ? 'draw' : 'pan'; updateHud(); };
+  $('sb-center').onclick = function () { if (viewActive()) centerView(); };
   $('sb-speed').oninput = function (e) {
     S.speed = parseInt(e.target.value, 10);
     updateHud();
@@ -1051,6 +1187,9 @@
       ref: function () { const L = level(); for (const c of L.ref) tapCell(c[0], c[1]); },
       levels: function () { return Levels.LEVELS; },
       layout: layout,
+      view: VIEW,
+      zoomAt: zoomAt,
+      centerView: centerView,
       progress: function () { return store.get('ardoise-progress', { stars: {} }); }
     };
   }

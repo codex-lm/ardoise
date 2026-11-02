@@ -78,7 +78,7 @@
       allDone: 'All twelve challenges cleared. The blackboard is yours!',
       // Sandbox
       sbTitle: 'Sandbox',
-      sbHint: 'Pick a pattern, tap the board to stamp it (R rotates). Or draw freehand with the chalk and the sponge.',
+      sbHint: 'A big board to explore: pick a pattern and tap to stamp it (R rotates), or draw freehand. Zoom with the wheel or a pinch, pan with the hand or two fingers.',
       speed: 'Speed',
       gens: '{n} gen/s',
       clear: 'Wipe',
@@ -97,6 +97,9 @@
       zoneOnly: 'Cells only inside the chalk zone',
       eraseOnly: 'This challenge is won with the sponge only',
       drawOnly: 'This challenge is won with chalk only',
+      pan: 'Hand',
+      recenter: 'Recenter',
+      usedStroke: '{n} chalk stroke',
       soundOn: 'Sound on',
       soundOff: 'Sound off',
       close: 'Close',
@@ -126,33 +129,33 @@
     fr: {
       langName: 'Français',
       tagline: 'Le Jeu de la vie de Conway, sur un tableau d’école',
-      subtitle: 'Douze défis à la craie et un atelier libre pour le plus célèbre automate cellulaire.',
+      subtitle: 'Douze défis à la craie et un atelier libre pour le doyen des automates cellulaires.',
       credit: 'Un jeu de Cédric Bernadac, créé avec des agents IA (ZCode & Kimi K3.1 Pro).',
-      homage: 'D’après John Horton Conway, 1937–2020.',
+      homage: 'En hommage à John Horton Conway, 1937–2020.',
       play: 'Défis',
       sandbox: 'Atelier',
       howto: 'Comment jouer',
-      touchHint: 'Souris, stylet ou tactile. Espace met en pause, S avance d’une génération.',
+      touchHint: 'Jouable à la souris, au stylet ou sur écran tactile. Espace met en pause, S avance d’une génération.',
       langNext: 'ES',
-      rulesHtml: '<p><b>La règle tient en une ligne.</b> Une case morte entourée d’exactement 3 voisines vivantes <i>naît</i>. Une cellule vivante entourée de 2 ou 3 voisines <i>survit</i>. Tout le reste meurt. C’est tout — le reste n’est que conséquence.</p>' +
-        '<p><b>Les défis.</b> Chaque défi vous donne une colonie et un budget de craie. Préparez le plateau pendant que la vie est en pause (chaque toucher bascule une case et coûte un trait de craie), puis laissez la vie courir jusqu’à la cloche :</p>' +
+      rulesHtml: '<p><b>La règle tient en une ligne.</b> Une cellule morte comptant exactement 3 voisines vivantes <i>naît</i>. Une cellule vivante comptant 2 ou 3 voisines vivantes <i>survit</i>. Tout le reste meurt. C’est tout — le reste n’est que conséquence.</p>' +
+        '<p><b>Les défis.</b> Chaque défi vous donne une colonie et une réserve de craie. Préparez le tableau pendant que la vie est en pause (chaque pression change l’état d’une cellule et coûte un trait de craie), puis laissez la vie évoluer jusqu’à la cloche\u00a0:</p>' +
         '<ul>' +
-        '<li><b>Équilibre</b> — atteindre exactement {n} cellules vivantes quand la cloche sonne à la génération {g}.</li>' +
-        '<li><b>Sauvetage</b> — la colonie est condamnée : ajoutez jusqu’à {k} cellules pour qu’au moins {n} cellules soient vivantes à la génération {g}.</li>' +
+        '<li><b>Équilibre</b> — atteignez exactement {n} cellules vivantes quand la cloche sonne à la génération {g}.</li>' +
+        '<li><b>Sauvetage</b> — la colonie est condamnée\u00a0: ajoutez jusqu’à {k} cellules pour qu’au moins {n} cellules soient vivantes à la génération {g}.</li>' +
         '<li><b>Extinction</b> — effacez jusqu’à {k} cellules pour que le tableau soit entièrement vide avant la génération {g}.</li>' +
-        '<li><b>Croissance</b> — posez exactement {b} cellules dans la zone à la craie, puis lancez : la plus grande population à la génération {g} gagne les étoiles.</li>' +
+        '<li><b>Croissance</b> — placez exactement {b} cellules dans la zone tracée à la craie, puis lancez\u00a0: la population la plus nombreuse à la génération {g} remporte les étoiles.</li>' +
         '</ul>' +
-        '<p><b>L’atelier.</b> Une grande planche, un réglage de vitesse, les bords qui se rejoignent, et une bibliothèque de motifs célèbres : planeurs, vaisseaux, pulsar, jusqu’au canon à planeurs de Gosper. La craie jeune est blanche, la craie ancienne jaunit, et les cellules mortes laissent une traînée qui s’efface.</p>' +
+        '<p><b>L’atelier.</b> Un grand tableau, un réglage de vitesse, des bords rejoints et une bibliothèque de motifs célèbres\u00a0: des planeurs, des vaisseaux, le pulsar et même le canon à planeurs de Gosper. Les traits de craie récents sont blancs et jaunissent avec le temps. Les cellules mortes laissent une légère trace qui finit par s’effacer.</p>' +
         '<p>★★★ récompense les solutions les plus économes. La cloche sonne toujours — soyez prêt.</p>',
       level: 'Défi {n}/{total}',
       budget: 'Craie {left}',
       gen: 'Gén. {n}',
       bellIn: 'Cloche dans {n}',
-      bellNow: 'Cloche !',
+      bellNow: 'Cloche !',
       pop: '{n} cellules',
-      paused: 'Pause',
+      paused: 'En pause',
       running: 'En cours',
-      setup: 'Préparez le plateau',
+      setup: 'Préparez le tableau',
       goal: 'Objectif',
       stars3: '★★★ {t} traits',
       stars2: '★★ {t} traits',
@@ -175,23 +178,23 @@
       goalTarget: 'Exactement {n} cellules vivantes à la génération {g}.',
       goalRescue: 'Au moins {n} cellules vivantes à la génération {g}.',
       goalExtinct: 'Un tableau vide avant la génération {g}.',
-      goalGrowth: 'Posez exactement {b} cellules dans la zone, atteignez la plus grande population à la génération {g}.',
+      goalGrowth: 'Placez exactement {b} cellules dans la zone et obtenez la plus grande population possible à la génération {g}.',
       placed: '{n}/{b} posées',
-      winTitle: 'La cloche sonne — bien joué !',
+      winTitle: 'La cloche sonne — bien joué !',
       failTitle: 'La cloche a sonné…',
       winTarget: 'Exactement {n} cellules. Précis comme la craie.',
-      winRescue: '{n} cellules vivantes à la cloche. La colonie est sauvée.',
-      winExtinct: 'Tableau nettoyé à la génération {g}.',
-      failBody: 'L’objectif est manqué. Effacez et réessayez.',
+      winRescue: 'Quand la cloche sonne, {n} cellules sont encore en vie. La colonie est sauvée.',
+      winExtinct: 'Tableau entièrement vide à la génération {g}.',
+      failBody: 'Objectif manqué. Effacez et réessayez.',
       usedStrokes: '{n} traits de craie',
-      bestPop: 'Population à la cloche : {n}',
+      bestPop: 'Population au moment de la cloche : {n}',
       hintUsed: 'Indice utilisé — une étoile en moins',
       next: 'Défi suivant',
       again: 'Réessayer',
       backMenu: 'Retour au menu',
-      allDone: 'Les douze défis sont réussis. Le tableau est à vous !',
+      allDone: 'Vous avez réussi les douze défis. Le tableau est à vous !',
       sbTitle: 'Atelier',
-      sbHint: 'Choisissez un motif, touchez le tableau pour le tamponner (R tourne). Ou dessinez à main levée avec la craie et l’éponge.',
+      sbHint: 'Un grand tableau à explorer : choisissez un motif et touchez pour le placer (R le fait pivoter), ou dessinez à main levée. Zoom à la molette ou au pincement, déplacement avec la main ou deux doigts.',
       speed: 'Vitesse',
       gens: '{n} gén./s',
       clear: 'Effacer',
@@ -201,14 +204,17 @@
       statusStill: 'Figure fixe',
       statusOsc: 'Oscillateur, période {n}',
       statusDead: 'Tableau vide',
-      confirmWipe: 'Effacer tout le tableau ?',
+      confirmWipe: 'Effacer tout le tableau ?',
       wiped: 'Tableau effacé',
       noChalk: 'Plus de craie',
-      noEditRun: 'Mettez la vie en pause pour modifier',
+      noEditRun: 'Mettez la vie en pause pour modifier le tableau',
       growthNeed: 'Posez exactement {b} cellules avant de lancer',
-      zoneOnly: 'Cellules uniquement dans la zone à la craie',
-      eraseOnly: 'Ce défi se gagne à l’éponge seulement',
-      drawOnly: 'Ce défi se gagne à la craie seulement',
+      zoneOnly: 'Cellules uniquement dans la zone tracée à la craie',
+      eraseOnly: 'Ce défi se gagne uniquement avec l’éponge',
+      drawOnly: 'Ce défi se gagne uniquement avec la craie',
+      pan: 'Main',
+      recenter: 'Recentrer',
+      usedStroke: '{n} trait de craie',
       soundOn: 'Son activé',
       soundOff: 'Son coupé',
       close: 'Fermer',
@@ -232,30 +238,30 @@
       pat_rpentomino: 'R-pentomino',
       pat_acorn: 'Gland',
       pat_diehard: 'Coriace',
-      pat_gosper: 'Canon de Gosper'
+      pat_gosper: 'Canon à planeurs de Gosper'
     },
 
     es: {
       langName: 'Español',
-      tagline: 'El Juego de la Vida de Conway, en una pizarra de colegio',
-      subtitle: 'Doce retos con tiza y un taller libre para el autómata celular más célebre.',
+      tagline: 'El juego de la vida de Conway, en una pizarra de colegio',
+      subtitle: 'Doce retos con tiza y un taller libre para el autómata celular más antiguo de todos.',
       credit: 'Un juego de Cédric Bernadac, creado con agentes de IA (ZCode & Kimi K3.1 Pro).',
-      homage: 'Según John Horton Conway, 1937–2020.',
+      homage: 'En homenaje a John Horton Conway, 1937–2020.',
       play: 'Retos',
       sandbox: 'Taller',
       howto: 'Cómo jugar',
-      touchHint: 'Ratón, lápiz o táctil. Espacio pausa, S avanza una generación.',
+      touchHint: 'Funciona con ratón, lápiz óptico o pantalla táctil. Espacio pone en pausa y S avanza una generación.',
       langNext: 'EN',
-      rulesHtml: '<p><b>La regla cabe en una línea.</b> Una casilla muerta con exactamente 3 vecinas vivas <i>nace</i>. Una célula viva con 2 o 3 vecinas <i>sobrevive</i>. Todo lo demás muere. Eso es todo — el resto es consecuencia.</p>' +
-        '<p><b>Los retos.</b> Cada reto te da una colonia y un presupuesto de tiza. Prepara el tablero mientras la vida está en pausa (cada toque cambia una casilla y cuesta un trazo de tiza), luego deja correr la vida hasta la campana:</p>' +
+      rulesHtml: '<p><b>La regla cabe en una línea.</b> Una célula muerta con exactamente 3 vecinas vivas <i>nace</i>. Una célula viva con 2 o 3 vecinas vivas <i>sobrevive</i>. Todo lo demás muere. Eso es todo: lo demás es consecuencia.</p>' +
+        '<p><b>Los retos.</b> Cada reto te da una colonia y una reserva de tiza. Prepara el tablero mientras la vida está en pausa (cada toque cambia el estado de una casilla y cuesta un trazo de tiza), luego deja que la vida avance hasta la campana:</p>' +
         '<ul>' +
-        '<li><b>Equilibrio</b> — alcanzar exactamente {n} células vivas cuando la campana suene en la generación {g}.</li>' +
+        '<li><b>Equilibrio</b> — alcanza exactamente {n} células vivas cuando la campana suene en la generación {g}.</li>' +
         '<li><b>Rescate</b> — la colonia está condenada: añade hasta {k} células para que al menos {n} células estén vivas en la generación {g}.</li>' +
         '<li><b>Apagón</b> — borra hasta {k} células para que el tablero quede completamente vacío antes de la generación {g}.</li>' +
-        '<li><b>Crecimiento</b> — coloca exactamente {b} células dentro de la zona de tiza y lanza: la población más grande en la generación {g} gana las estrellas.</li>' +
+        '<li><b>Crecimiento</b> — coloca exactamente {b} células dentro de la zona marcada con tiza y pon la vida en marcha: la población más numerosa en la generación {g} gana las estrellas.</li>' +
         '</ul>' +
-        '<p><b>El taller.</b> Un tablero grande, un mando de velocidad, bordes que se unen y una biblioteca de patrones famosos: planeadores, naves, el púlsar, hasta el cañón de planeadores de Gosper. La tiza joven es blanca, la tiza antigua se vuelve amarilla, y las células muertas dejan un rastro que se borra solo.</p>' +
-        '<p>★★★ premia las soluciones más ajustadas. La campana siempre suena —estate listo.</p>',
+        '<p><b>El taller.</b> Un tablero grande, un control de velocidad, bordes unidos y una biblioteca de patrones famosos: planeadores, naves, el púlsar e incluso el cañón de planeadores de Gosper. Los trazos de tiza recientes son blancos y amarillean con el tiempo. Las células muertas dejan una leve huella que acaba por desvanecerse.</p>' +
+        '<p>★★★ premia las soluciones con menos trazos. La campana siempre suena: prepárate.</p>',
       level: 'Reto {n}/{total}',
       budget: 'Tiza {left}',
       gen: 'Gen. {n}',
@@ -287,23 +293,23 @@
       goalTarget: 'Exactamente {n} células vivas en la generación {g}.',
       goalRescue: 'Al menos {n} células vivas en la generación {g}.',
       goalExtinct: 'Un tablero vacío antes de la generación {g}.',
-      goalGrowth: 'Coloca exactamente {b} células en la zona, alcanza la mayor población en la generación {g}.',
+      goalGrowth: 'Coloca exactamente {b} células en la zona y alcanza la mayor población posible en la generación {g}.',
       placed: '{n}/{b} colocadas',
       winTitle: 'Suena la campana — ¡bien jugado!',
       failTitle: 'La campana sonó…',
       winTarget: 'Exactamente {n} células. Preciso como la tiza.',
-      winRescue: '{n} células vivas a la campana. La colonia está a salvo.',
-      winExtinct: 'Tablero limpio en la generación {g}.',
-      failBody: 'El objetivo se escapó. Borra y vuelve a intentarlo.',
+      winRescue: 'Cuando suena la campana, quedan {n} células vivas. La colonia está a salvo.',
+      winExtinct: 'Tablero completamente vacío en la generación {g}.',
+      failBody: 'No has alcanzado el objetivo. Borra y vuelve a intentarlo.',
       usedStrokes: '{n} trazos de tiza',
-      bestPop: 'Población a la campana: {n}',
+      bestPop: 'Población al sonar la campana: {n}',
       hintUsed: 'Pista usada — una estrella menos',
       next: 'Siguiente reto',
       again: 'Reintentar',
       backMenu: 'Volver al menú',
-      allDone: 'Los doce retos superados. ¡La pizarra es tuya!',
+      allDone: 'Has superado los doce retos. ¡La pizarra es tuya!',
       sbTitle: 'Taller',
-      sbHint: 'Elige un patrón, toca el tablero para estamparlo (R lo gira). O dibuja a mano alzada con la tiza y el borrador.',
+      sbHint: 'Un tablero grande para explorar: elige un patrón y toca para colocarlo (R lo hace girar) o dibuja a mano alzada. Zoom con la rueda o pellizcando; mueve con la mano o dos dedos.',
       speed: 'Velocidad',
       gens: '{n} gen/s',
       clear: 'Borrar todo',
@@ -316,11 +322,14 @@
       confirmWipe: '¿Borrar todo el tablero?',
       wiped: 'Tablero borrado',
       noChalk: 'No queda tiza',
-      noEditRun: 'Pausa la vida para editar',
-      growthNeed: 'Coloca exactamente {b} células antes de lanzar',
-      zoneOnly: 'Células solo dentro de la zona de tiza',
+      noEditRun: 'Pausa la vida para editar el tablero',
+      growthNeed: 'Coloca exactamente {b} células antes de poner la vida en marcha',
+      zoneOnly: 'Células solo dentro de la zona marcada con tiza',
       eraseOnly: 'Este reto se gana solo con el borrador',
       drawOnly: 'Este reto se gana solo con la tiza',
+      pan: 'Mano',
+      recenter: 'Centrar',
+      usedStroke: '{n} trazo de tiza',
       soundOn: 'Sonido activado',
       soundOff: 'Sonido apagado',
       close: 'Cerrar',
@@ -344,7 +353,7 @@
       pat_rpentomino: 'R-pentominó',
       pat_acorn: 'Bellota',
       pat_diehard: 'Duro de matar',
-      pat_gosper: 'Cañón de Gosper'
+      pat_gosper: 'Cañón de planeadores de Gosper'
     }
   };
 
