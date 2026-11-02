@@ -6,7 +6,7 @@
   "controls": [
     "Tap or drag on the board to place chalk (or erase with the sponge) while life is paused; every flip costs one chalk stroke. Run, pause, or step one generation.",
     "Space pauses, S steps one generation, R restarts a challenge (or rotates the selected pattern in the sandbox).",
-    "In the exploratory sandbox: wheel or pinch to zoom, drag with the hand tool (or two fingers) to pan, recenter with one tap. Pick a pattern and stamp it, adjust speed 1-60 gen/s, sprinkle a soup, toggle wrap-around edges."
+    "Sandbox: wheel or pinch to zoom, hand tool or two fingers to pan, recenter in one tap. Stamp patterns, speed 1-60 gen/s, sprinkle, wrap edges."
   ],
   "genre": [
     "Puzzle",
